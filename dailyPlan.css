@@ -1,0 +1,154 @@
+/* 每日计划链接样式 - 简洁图标版 */
+
+.tasksCalendar .daily-plan-link {
+    margin-top: 4px;
+    padding: 2px;
+    background: var(--background-modifier-hover);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid var(--background-modifier-border);
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+}
+
+.tasksCalendar .daily-plan-link:hover {
+    background: var(--background-modifier-active);
+    border-color: var(--interactive-accent);
+    transform: translateY(-1px) scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tasksCalendar .daily-plan-link:active {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 今日的每日计划链接特殊样式 */
+.tasksCalendar .cell.today .daily-plan-link {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent-hover);
+}
+
+.tasksCalendar .cell.today .daily-plan-link:hover {
+    background: var(--interactive-accent-hover);
+    border-color: var(--interactive-accent-hover);
+    transform: translateY(-1px) scale(1.15);
+}
+
+/* 有计划的日期样式 */
+.tasksCalendar .cell.has-plan .daily-plan-link {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+    border-color: rgba(46, 204, 113, 0.3);
+}
+
+.tasksCalendar .cell.has-plan .daily-plan-link:hover {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: rgba(46, 204, 113, 0.5);
+    color: #27ae60;
+}
+
+/* 无计划的日期样式 */
+.tasksCalendar .cell.no-plan .daily-plan-link {
+    background: rgba(241, 196, 15, 0.1);
+    color: #f1c40f;
+    border-color: rgba(241, 196, 15, 0.3);
+}
+
+.tasksCalendar .cell.no-plan .daily-plan-link:hover {
+    background: rgba(241, 196, 15, 0.2);
+    border-color: rgba(241, 196, 15, 0.5);
+    color: #f39c12;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .tasksCalendar .daily-plan-link {
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+    }
+}
+
+/* 迷你模式下的样式 */
+.tasksCalendar.mini .daily-plan-link {
+    display: none; /* 在迷你模式下隐藏每日计划链接 */
+}
+
+/* 打印样式 */
+@media print {
+    .tasksCalendar .daily-plan-link {
+        display: none;
+    }
+}
+
+/* 动画效果 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+.tasksCalendar .daily-plan-link.newly-created {
+    animation: pulse 0.5s ease, bounce 0.5s ease;
+    background: rgba(46, 204, 113, 0.2);
+    border-color: rgba(46, 204, 113, 0.5);
+    color: #2ecc71;
+}
+
+/* 焦点状态 */
+.tasksCalendar .daily-plan-link:focus {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 1px;
+}
+
+/* 禁用状态 */
+.tasksCalendar .daily-plan-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.tasksCalendar .daily-plan-link.disabled:hover {
+    background: var(--background-modifier-hover);
+    transform: none;
+    box-shadow: none;
+}
+
+/* 工具提示样式 */
+.tasksCalendar .daily-plan-link::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    margin-bottom: 5px;
+}
+
+.tasksCalendar .daily-plan-link:hover::after {
+    opacity: 1;
+    visibility: visible;
+}

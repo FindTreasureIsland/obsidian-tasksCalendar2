@@ -1,4 +1,4 @@
-let {pages, view, firstDayOfWeek, globalTaskFilter, dailyNoteFolder, dailyNoteFormat, startPosition, css, options} = input;
+let {pages, view, firstDayOfWeek, globalTaskFilter, dailyNoteFolder, dailyNoteFormat, startPosition, css, options, dailyPlanFolder, dailyPlanTemplate} = input;
 
 // Error Handling
 if (!pages && pages!="") { dv.span('> [!ERROR] Missing pages parameter\n> \n> Please set the pages parameter like\n> \n> `pages: ""`'); return false };
@@ -39,10 +39,74 @@ var listIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" v
 var calendarClockIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"></path><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h5"></path><path d="M17.5 17.5 16 16.25V14"></path><path d="M22 16a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z"></path></svg>';
 var calendarCheckIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="m9 16 2 2 4-4"></path></svg>';
 var calendarHeartIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h7"></path><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="M21.29 14.7a2.43 2.43 0 0 0-2.65-.52c-.3.12-.57.3-.8.53l-.34.34-.35-.34a2.43 2.43 0 0 0-2.65-.53c-.3.12-.56.3-.79.53-.95.94-1 2.53.2 3.74L17.5 22l3.6-3.55c1.2-1.21 1.14-2.8.19-3.74Z"></path></svg>';
-var cellTemplate = "<div class='cell {{class}}' data-weekday='{{weekday}}'><div class='cellName' data-path='{{dailyNote}}' style='cursor:pointer;'>{{cellName}}</div><div class='cellContent'>{{cellContent}}</div></div>";
+var cellTemplate = "<div class='cell {{class}}' data-weekday='{{weekday}}' data-date='{{date}}'><div class='cellName' data-path='{{dailyNote}}' style='cursor:pointer;'>{{cellName}}</div><div class='cellContent'>{{cellContent}}</div></div>";
 var taskTemplate = "<div class='tc-link' data-path='{{taskPath}}' style='cursor:pointer;'><div class='task {{class}}' style='{{style}}'><div class='inner'><div class='note'>{{note}}</div><div class='icon'>{{icon}}</div><div class='description' data-relative='{{relative}}'>{{taskContent}}</div></div></div></div>";
+
+// 每日计划相关变量
+if (!dailyPlanFolder) { dailyPlanFolder = "songzhiyong/02工作计划" };
+if (!dailyPlanTemplate) { dailyPlanTemplate = "puplic/00文档模板/每日工作计划模板.md" };
+var dailyPlanIcon = "📋";
 const rootNode = dv.el("div", "", {cls: "tasksCalendar "+options, attr: {id: "tasksCalendar"+tid, view: view, style: 'position:relative;-webkit-user-select:none!important'}});
 if (css) { var style = document.createElement("style"); style.innerHTML = css; rootNode.append(style) };
+
+// 加载每日计划CSS
+var dailyPlanStyle = document.createElement("style");
+dailyPlanStyle.textContent = `
+.tasksCalendar .daily-plan-link {
+    margin-top: 4px;
+    padding: 2px 6px;
+    background: var(--background-modifier-hover);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid var(--background-modifier-border);
+    font-size: 11px;
+    font-weight: 500;
+    gap: 2px;
+    white-space: nowrap;
+}
+.tasksCalendar .daily-plan-link:hover {
+    background: var(--background-modifier-active);
+    border-color: var(--interactive-accent);
+    transform: translateY(-1px) scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.tasksCalendar .cell.today .daily-plan-link {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent-hover);
+}
+.tasksCalendar .cell.today .daily-plan-link:hover {
+    background: var(--interactive-accent-hover);
+    border-color: var(--interactive-accent-hover);
+}
+.tasksCalendar .cell.has-plan .daily-plan-link {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+    border-color: rgba(46, 204, 113, 0.3);
+}
+.tasksCalendar .cell.no-plan .daily-plan-link {
+    background: rgba(241, 196, 15, 0.1);
+    color: #f1c40f;
+    border-color: rgba(241, 196, 15, 0.3);
+}
+.tasksCalendar.mini .daily-plan-link span:not(:first-child) {
+    display: none;
+}
+.tasksCalendar.mini .daily-plan-link {
+    padding: 2px;
+}
+@media (max-width: 768px) {
+    .tasksCalendar .daily-plan-link {
+        padding: 2px 4px;
+        font-size: 10px;
+    }
+}
+`;
+rootNode.append(dailyPlanStyle);
 var taskDoneIcon = "✅";
 var taskDueIcon = "📅";
 var taskScheduledIcon = "⏳";
@@ -59,6 +123,11 @@ setButtons();
 setStatisticPopUp();
 setWeekViewContext();
 eval("get"+capitalize(view))(tasks, selectedDate);
+
+// 初始化每日计划功能（延迟执行以确保DOM已渲染）
+setTimeout(() => {
+    initDailyPlanFeatures();
+}, 100);
 
 // Modal utilities
 function getDefaultNewFileBaseDir() {
@@ -337,13 +406,25 @@ function setTaskEvents() {
 
 function setDailyNoteEvents() {
   rootNode.querySelectorAll("div.cellName").forEach(cellName => {
-    cellName.addEventListener("click", async (e) => {
+    cellName.addEventListener("dblclick", async (e) => {
       e.preventDefault();
       e.stopPropagation();
       const dataPath = cellName.getAttribute("data-path");
       const base = (dataPath || moment().format("YYYY-MM-DD")).toString();
       const dateStr = base.split("/").pop();
-      await createDailyNoteAndOpen(dateStr);
+
+      // 双击打开对应的计划文件
+      const planPath = getDailyPlanPath(moment(dateStr, "YYYY-MM-DD"));
+      const file = app.vault.getAbstractFileByPath(planPath);
+
+      if (file) {
+        // 文件存在，直接在新标签页打开（而不是弹出窗口）
+        const leaf = app.workspace.getLeaf(true);
+        await leaf.openFile(file, { active: true });
+      } else {
+        // 文件不存在，使用配置的模板创建新文件
+        await createDailyPlan(moment(dateStr, "YYYY-MM-DD"));
+      }
     }, true);
   });
 }
@@ -471,7 +552,14 @@ function getTasks(date) {
 	scheduled = tasks.filter(t=>!t.completed && !t.checked && t.scheduled && moment(t.scheduled.toString()).isSame(date)).sort(t=>t.scheduled);
 	process = tasks.filter(t=>!t.completed && !t.checked && t.due && t.start && moment(t.due.toString()).isAfter(date) && moment(t.start.toString()).isBefore(date) );
 	cancelled = tasks.filter(t=>!t.completed && t.checked && t.due && moment(t.due.toString()).isSame(date)).sort(t=>t.due);
-	dailyNote = tasks.filter(t=>!t.completed && !t.checked && t.dailyNote && moment(t.dailyNote.toString()).isSame(date)).sort(t=>t.dailyNote);
+
+	// 对于当日，显示所有任务（包括已完成和未完成的）
+	var isToday = date === tToday;
+	if (isToday) {
+		dailyNote = tasks.filter(t=>t.dailyNote && moment(t.dailyNote.toString()).isSame(date)).sort(t=>t.dailyNote);
+	} else {
+		dailyNote = tasks.filter(t=>!t.completed && !t.checked && t.dailyNote && moment(t.dailyNote.toString()).isSame(date)).sort(t=>t.dailyNote);
+	}
 };
 
 function setTask(obj, cls) {
@@ -792,6 +880,14 @@ function getMonth(tasks, month) {
 			var weekDay = moment(month).add(i, "days").format("d");
 			var shortDayName = moment(month).add(i, "days").format("D");
 			var longDayName = moment(month).add(i, "days").format("D. MMM");
+
+			// 检查是否有每日计划，有则添加图标
+			var planExists = checkDailyPlanExists(moment(currentDate, "YYYY-MM-DD"));
+			if (planExists) {
+				shortDayName = shortDayName + " 📋";
+				longDayName = longDayName + " 📋";
+			}
+
 			var shortWeekday = moment(month).add(i, "days").format("ddd");
 
 			// Filter Tasks
@@ -871,6 +967,13 @@ function getWeek(tasks, week) {
 		var weekDay = moment(week).add(i, "days").format("d");
 		var dayName = moment(currentDate).format("ddd D.");
 		var longDayName = moment(currentDate).format("ddd, D. MMM");
+
+		// 检查是否有每日计划，有则添加图标
+		var planExists = checkDailyPlanExists(moment(currentDate, "YYYY-MM-DD"));
+		if (planExists) {
+			dayName = dayName + " 📋";
+			longDayName = longDayName + " 📋";
+		}
 		
 		// Filter Tasks
 		getTasks(currentDate);
@@ -971,3 +1074,111 @@ function getList(tasks, month) {
 		listElement.scrollTo(0, scrollPos);
 	};
 };
+
+// ============================================
+// 每日计划相关函数
+// ============================================
+
+// 获取每日计划文档路径
+function getDailyPlanPath(date) {
+    const dateStr = date.format("YYYY-MM-DD");
+    return `${dailyPlanFolder}/${dateStr}-工作计划.md`;
+}
+
+// 检查每日计划文档是否存在
+function checkDailyPlanExists(date) {
+    const path = getDailyPlanPath(date);
+    const file = app.vault.getAbstractFileByPath(path);
+    return file !== null;
+}
+
+// 创建每日计划文档
+async function createDailyPlan(date) {
+    try {
+        const path = getDailyPlanPath(date);
+        const templateFile = app.vault.getAbstractFileByPath(dailyPlanTemplate);
+
+        if (!templateFile) {
+            new Notice(`模板文件不存在: ${dailyPlanTemplate}`);
+            return null;
+        }
+
+        // 读取模板内容
+        let content = await app.vault.read(templateFile);
+
+        // 替换模板变量
+        const dateStr = date.format("YYYY-MM-DD");
+        const weekday = date.format("dddd");
+
+        content = content
+            .replace(/{{date:YYYY-MM-DD}}/g, dateStr)
+            .replace(/{{date:dddd}}/g, weekday)
+            .replace(/{{date:YYYY-MM-DD HH:mm}}/g, date.format("YYYY-MM-DD HH:mm"));
+
+        // 添加 frontmatter
+        const frontmatter = `---
+created: ${dateStr}
+updated: ${dateStr}
+tags: [工作计划, 每日计划, ${dateStr}]
+status: 待开始
+priority: medium
+type: 每日计划
+banner: "https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+banner_x: 50
+banner_y: 50
+---\n\n`;
+
+        // 确保内容以 frontmatter 开头
+        if (!content.startsWith('---')) {
+            content = frontmatter + content;
+        }
+
+        // 创建文件
+        const file = await app.vault.create(path, content);
+        new Notice(`已创建每日计划: ${dateStr}`);
+        return file;
+    } catch (error) {
+        new Notice(`创建每日计划失败: ${error.message}`);
+        console.error(error);
+        return null;
+    }
+}
+
+// 打开每日计划文档
+async function openDailyPlan(date) {
+    const path = getDailyPlanPath(date);
+    const file = app.vault.getAbstractFileByPath(path);
+
+    if (!file) {
+        // 如果文档不存在，先创建
+        const createdFile = await createDailyPlan(date);
+        if (createdFile) {
+            await openFileInLeaf(createdFile);
+        }
+    } else {
+        await openFileInLeaf(file);
+    }
+}
+
+// 在 Obsidian 中打开文件
+async function openFileInLeaf(file) {
+    try {
+        const leaf = app.workspace.getLeaf(false);
+        await leaf.openFile(file);
+        app.workspace.setActiveLeaf(leaf, { focus: true });
+    } catch (error) {
+        new Notice(`打开文件失败: ${error.message}`);
+        console.error(error);
+    }
+}
+
+// 在日历单元格中添加每日计划链接（已停用，图标显示在日期名称旁边）
+function addDailyPlanLinkToCell(cellElement, date) {
+    // 已停用，不再在格子底部显示计划链接
+    return;
+}
+
+// 初始化每日计划功能
+function initDailyPlanFeatures() {
+    // 不再在格子底部显示计划链接，图标已在日期名称旁边显示
+}
